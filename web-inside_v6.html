@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web-inside · TPB Link Extractor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #eef2f5 100%);
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .system-card {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 48px;
+            box-shadow: 0 30px 60px -20px rgba(0, 20, 30, 0.4), 0 8px 24px rgba(0, 0, 0, 0.06);
+            padding: 28px 30px 35px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: 0.2s;
+        }
+
+        .system-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px 20px;
+            margin-bottom: 28px;
+        }
+
+        .system-header h1 {
+            font-weight: 600;
+            font-size: 1.9rem;
+            letter-spacing: -0.3px;
+            color: #0b1a26;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .system-header h1 span {
+            background: #1e2b39;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 4px 14px;
+            border-radius: 80px;
+            letter-spacing: 0.3px;
+            background: #2c3e50;
+        }
+
+        .input-area {
+            display: flex;
+            flex: 1 1 480px;
+            gap: 12px;
+            background: white;
+            padding: 6px 6px 6px 20px;
+            border-radius: 80px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+            border: 1px solid #dae2ea;
+            transition: 0.2s;
+        }
+
+        .input-area:focus-within {
+            border-color: #3b6e9b;
+            box-shadow: 0 0 0 4px rgba(59, 110, 155, 0.15);
+        }
+
+        .input-area input {
+            flex: 1;
+            border: none;
+            padding: 14px 0;
+            font-size: 1rem;
+            background: transparent;
+            outline: none;
+            color: #0e1f2b;
+            font-weight: 450;
+            min-width: 160px;
+        }
+
+        .input-area input::placeholder {
+            color: #8b9aa8;
+            font-weight: 400;
+            letter-spacing: -0.2px;
+        }
+
+        .input-area button {
+            background: #1e2f3f;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 80px;
+            font-weight: 550;
+            font-size: 0.95rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 8px rgba(0, 20, 30, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .input-area button:hover {
+            background: #123042;
+            transform: scale(0.97);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-area button:active {
+            transform: scale(0.94);
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: #3f5565;
+            background: rgba(0, 0, 0, 0.02);
+            padding: 6px 16px;
+            border-radius: 40px;
+            display: inline-block;
+            border: 1px solid #dde5ec;
+            backdrop-filter: blur(2px);
+        }
+
+        .inject-panel {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 16px;
+            background: #eef4f9;
+            padding: 10px 18px 10px 22px;
+            border-radius: 60px;
+            margin: 16px 0 18px 0;
+            border: 1px solid #d0dce8;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+        }
+
+        .inject-panel label {
+            font-weight: 550;
+            color: #1b3140;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.2px;
+        }
+
+        .inject-panel label span {
+            background: #1f3343;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-weight: 500;
+        }
+
+        .inject-input-wrap {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            background: white;
+            border-radius: 60px;
+            padding: 2px 2px 2px 18px;
+            border: 1px solid #cbd8e5;
+            transition: 0.15s;
+        }
+
+        .inject-input-wrap:focus-within {
+            border-color: #3b6e9b;
+            box-shadow: 0 0 0 3px rgba(59, 110, 155, 0.15);
+        }
+
+        .inject-input-wrap input {
+            flex: 1;
+            border: none;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            background: transparent;
+            outline: none;
+            color: #0d1d2a;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-weight: 450;
+            min-width: 100px;
+        }
+
+        .inject-input-wrap input::placeholder {
+            color: #97aebb;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 350;
+        }
+
+        .inject-btn {
+            background: #1e3f4a;
+            border: none;
+            padding: 8px 22px;
+            border-radius: 60px;
+            color: white;
+            font-weight: 550;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.12s;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            letter-spacing: 0.2px;
+        }
+
+        .inject-btn:hover {
+            background: #12323d;
+            transform: scale(0.96);
+        }
+
+        .inject-btn:active {
+            transform: scale(0.92);
+        }
+
+        .inject-clear {
+            background: transparent;
+            border: 1px solid #b8ccdb;
+            color: #2d4a5c;
+            padding: 8px 16px;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .inject-clear:hover {
+            background: #dce6f0;
+        }
+
+        .inject-help {
+            font-size: 0.7rem;
+            color: #4a6a7a;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 4px 14px;
+            border-radius: 40px;
+            border: 1px dashed #a0b8c8;
+        }
+
+        .viewport-container {
+            background: #0f1a22;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 20px 40px -16px rgba(0, 0, 0, 0.6);
+            transition: 0.25s ease;
+            margin-top: 4px;
+        }
+
+        .viewport-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            background: #1d2b36;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 8px;
+            margin-right: 12px;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 40px;
+            background: #3a4b58;
+            transition: 0.1s;
+        }
+
+        .dot:nth-child(1) {
+            background: #fc625c;
+        }
+        .dot:nth-child(2) {
+            background: #fdbc40;
+        }
+        .dot:nth-child(3) {
+            background: #34c84a;
+        }
+
+        .viewport-url {
+            background: #10212b;
+            padding: 6px 16px;
+            border-radius: 60px;
+            color: #b3d0e0;
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            letter-spacing: 0.2px;
+            flex: 1;
+            min-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: 1px solid #2a4050;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: 0.15s;
+            position: relative;
+        }
+
+        .viewport-url:hover {
+            background: #1a3140;
+            border-color: #4a7a9a;
+        }
+
+        .viewport-url .edit-hint {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.6rem;
+            background: #2a4a5a;
+            padding: 2px 10px;
+            border-radius: 30px;
+            color: #b0d0e0;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            letter-spacing: 0.4px;
+            font-weight: 400;
+        }
+
+        .viewport-url:hover .edit-hint {
+            opacity: 0.9;
+        }
+
+        .viewport-url.editing {
+            background: #0b1e2a;
+            border-color: #5a9ac0;
+            box-shadow: 0 0 0 3px rgba(70, 140, 200, 0.2);
+        }
+
+        .viewport-url input {
+            background: transparent;
+            border: none;
+            color: #d6edff;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            width: 100%;
+            outline: none;
+            padding: 0;
+            margin: 0;
+            letter-spacing: 0.2px;
+        }
+
+        .viewport-url input::placeholder {
+            color: #6a8fa5;
+            font-weight: 300;
+        }
+
+        .iframe-wrapper {
+            position: relative;
+            width: 100%;
+            background: #0b141c;
+            height: 0;
+            padding-bottom: 70%;
+            min-height: 340px;
+            overflow: hidden;
+        }
+
+        .iframe-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            display: block;
+        }
+
+        .fallback-msg {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #141f29;
+            color: #9ab3c9;
+            font-size: 1.1rem;
+            padding: 30px;
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .fallback-msg .icon {
+            font-size: 3.4rem;
+            margin-bottom: 14px;
+            opacity: 0.7;
+        }
+
+        .fallback-msg small {
+            opacity: 0.7;
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+
+        .fallback-msg .btn-open {
+            margin-top: 16px;
+            padding: 10px 24px;
+            background: #2a5a7a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            pointer-events: auto;
+            transition: 0.15s;
+        }
+
+        .fallback-msg .btn-open:hover {
+            background: #3a7a9a;
+            transform: scale(1.02);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 16px 4px 16px;
+            color: #889fb0;
+            font-size: 0.8rem;
+            background: #1d2b36;
+            border-top: 1px solid #2a3d4b;
+            letter-spacing: 0.2px;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .status-bar span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge {
+            background: #2b4050;
+            padding: 2px 12px;
+            border-radius: 30px;
+            color: #d6e6f2;
+        }
+
+        .badge-success {
+            background: #1a4a2a;
+            color: #a0e0b0;
+        }
+
+        .badge-error {
+            background: #5a2a2a;
+            color: #ffb0b0;
+        }
+
+        .badge-warning {
+            background: #5a4a1a;
+            color: #f0d080;
+        }
+
+        .delay-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #4a6a7a;
+        }
+
+        .delay-control input {
+            width: 60px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 1px solid #cbd8e5;
+            background: white;
+            font-size: 0.8rem;
+        }
+
+        .proxy-status {
+            font-size: 0.7rem;
+            color: #6a8fa5;
+            background: #1a2a3a;
+            padding: 2px 12px;
+            border-radius: 40px;
+            border: 1px solid #2a4a5a;
+        }
+
+        /* Modal for results */
+        .result-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a2a3a;
+            border: 1px solid #4a7a9a;
+            padding: 24px;
+            z-index: 99999;
+            max-width: 90%;
+            max-height: 80%;
+            overflow: auto;
+            border-radius: 12px;
+            color: #d6edff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            font-family: 'Segoe UI', sans-serif;
+            min-width: 400px;
+        }
+
+        .result-modal .btn-bar {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .result-modal .btn-bar button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-size: 0.85rem;
+            transition: 0.15s;
+        }
+
+        .result-modal .btn-bar button:hover {
+            transform: scale(0.97);
+        }
+
+        .result-modal .btn-copy {
+            background: #2a5a7a;
+        }
+
+        .result-modal .btn-close {
+            background: #5a2a2a;
+        }
+
+        .result-modal .stats {
+            margin: 5px 0 10px;
+            color: #b0d0e0;
+            font-size: 13px;
+        }
+
+        .result-modal h3 {
+            margin: 8px 0;
+            color: #b0d8f0;
+        }
+
+        .result-modal pre {
+            background: #0b1a2a;
+            padding: 12px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow: auto;
+            color: #b0d0e0;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        @media (max-width: 700px) {
+            .system-card {
+                padding: 20px 16px;
+            }
+            .input-area {
+                flex-wrap: wrap;
+                background: transparent;
+                padding: 0;
+                gap: 10px;
+                border: none;
+                box-shadow: none;
+            }
+            .input-area input {
+                background: white;
+                padding: 14px 20px;
+                border-radius: 60px;
+                border: 1px solid #d0dce6;
+            }
+            .input-area button {
+                width: 100%;
+                justify-content: center;
+            }
+            .inject-panel {
+                flex-direction: column;
+                align-items: stretch;
+                border-radius: 30px;
+                padding: 16px;
+            }
+            .inject-input-wrap {
+                padding-left: 16px;
+            }
+            .viewport-url {
+                font-size: 0.7rem;
+            }
+            .viewport-url .edit-hint {
+                display: none;
+            }
+            .inject-help {
+                text-align: center;
+            }
+            .delay-control {
+                justify-content: center;
+            }
+            .result-modal {
+                min-width: unset;
+                width: 95%;
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="system-card">
+        <div class="system-header">
+            <h1>
+                🧭 web·inside
+                <span>TPB extractor</span>
+            </h1>
+            <div class="hint">
+                ⚡ paste link · extract id= links
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="url" id="urlInput" placeholder="https://example.com" value="https://thepiratebay.org/search.php?q=gt+a+%2B+pc&cat=0">
+            <button id="loadBtn">↻ Load & Extract</button>
+        </div>
+
+        <div class="inject-panel">
+            <label>
+                💉 extract links
+                <span>id=</span>
+            </label>
+            <div class="inject-input-wrap">
+                <input type="text" id="injectInput" placeholder='Extract links with id=' value='(function(){const query="https://thepiratebay.org/description.php?id=";const links=document.querySelectorAll("a[href]");let matches=[];let allLinks=[];links.forEach(link=>{const href=link.href||link.getAttribute("href");if(href){allLinks.push(href);if(href.includes(query)){matches.push(href);}}});return { matches: matches, allLinks: allLinks };})();'>
+            </div>
+            <button class="inject-btn" id="injectBtn">▶ Extract</button>
+            <button class="inject-clear" id="injectClear">× clear</button>
+            <div class="delay-control">
+                <label>⏱ delay:</label>
+                <input type="number" id="delayInput" value="1000" min="0" max="5000" step="100">ms
+            </div>
+            <span class="inject-help">finds links with id=</span>
+        </div>
+
+        <div class="viewport-container">
+            <div class="viewport-header">
+                <div class="window-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <div class="viewport-url" id="viewUrlDisplay">
+                    <span id="urlDisplayText">🌐 thepiratebay.org</span>
+                    <span class="edit-hint">✎ click to edit</span>
+                </div>
+                <span class="proxy-status" id="proxyStatus">🌍 proxy: off</span>
+            </div>
+
+            <div class="iframe-wrapper" id="iframeWrapper">
+                <iframe id="webFrame" src="https://thepiratebay.org/search.php?q=gt+a+%2B+pc&cat=0" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+                <div class="fallback-msg" id="fallbackMsg">
+                    <div class="icon">🖥️</div>
+                    <div>Paste a link above &amp; press <strong>Load & Extract</strong></div>
+                    <small>click the URL in the header to edit</small>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <span>🟢 <span id="statusText">ready</span></span>
+                <span class="badge" id="frameInfo">⬡ iframe</span>
+                <span id="timeStamp"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            "use strict";
+
+            const urlInput = document.getElementById('urlInput');
+            const loadBtn = document.getElementById('loadBtn');
+            const webFrame = document.getElementById('webFrame');
+            const viewUrlContainer = document.getElementById('viewUrlDisplay');
+            const urlDisplayText = document.getElementById('urlDisplayText');
+            const fallbackMsg = document.getElementById('fallbackMsg');
+            const statusText = document.getElementById('statusText');
+            const frameInfo = document.getElementById('frameInfo');
+            const timeStamp = document.getElementById('timeStamp');
+            const proxyStatus = document.getElementById('proxyStatus');
+
+            const injectInput = document.getElementById('injectInput');
+            const injectBtn = document.getElementById('injectBtn');
+            const injectClear = document.getElementById('injectClear');
+            const delayInput = document.getElementById('delayInput');
+
+            let currentUrl = 'https://thepiratebay.org/search.php?q=gt+a+%2B+pc&cat=0';
+            let isEditing = false;
+            let injectionTimeout = null;
+            let fetchedHtml = '';
+
+            function updateTimestamp() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                timeStamp.textContent = '⏱ ' + timeStr;
+            }
+            updateTimestamp();
+            setInterval(updateTimestamp, 10000);
+
+            function prepareUrl(raw) {
+                let url = raw.trim();
+                if (!url) return null;
+                
+                let isViewSource = false;
+                if (url.toLowerCase().startsWith('view-source:')) {
+                    isViewSource = true;
+                    url = url.substring('view-source:'.length).trim();
+                    if (!url) return null;
+                }
+
+                if (url.toLowerCase().startsWith('javascript:')) {
+                    return { url: url, isViewSource: false };
+                }
+
+                if (!/^https?:\/\//i.test(url)) {
+                    url = 'https://' + url;
+                }
+                try {
+                    const parsed = new URL(url);
+                    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                        return null;
+                    }
+                    return { url: parsed.href, isViewSource: isViewSource };
+                } catch (_) {
+                    return null;
+                }
+            }
+
+            function getDisplayText(url, isViewSource) {
+                if (!url) return '🌐 (empty)';
+                if (url.toLowerCase().startsWith('javascript:')) {
+                    return '⚡ ' + url.substring(0, 30) + (url.length > 30 ? '…' : '');
+                }
+                try {
+                    const urlObj = new URL(url);
+                    let host = urlObj.hostname;
+                    if (host.length > 30) host = host.substring(0, 28) + '…';
+                    return (isViewSource ? '📄 source:' : '🌐 ') + host;
+                } catch (_) {
+                    return (isViewSource ? '📄 source:' : '🌐 ') + url.substring(0, 40);
+                }
+            }
+
+            // Extract links from HTML using the injected JavaScript
+            function extractLinksFromHtml(html, jsCode) {
+                // Create a temporary DOM from the HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Create a function from the JS code that returns data
+                const func = new Function('document', 'return ' + jsCode);
+                try {
+                    const result = func(doc);
+                    return result;
+                } catch(e) {
+                    console.error('Extraction error:', e);
+                    return null;
+                }
+            }
+
+            // Show results modal
+            function showResults(matches, allLinks) {
+                const old = document.getElementById('resultModal');
+                if (old) old.remove();
+
+                const modal = document.createElement('div');
+                modal.id = 'resultModal';
+                modal.className = 'result-modal';
+
+                const btnBar = document.createElement('div');
+                btnBar.className = 'btn-bar';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn-copy';
+                copyBtn.textContent = '📋 Copy id= links';
+                copyBtn.onclick = function() {
+                    navigator.clipboard.writeText(matches.join('\n')).then(() => {
+                        msg.textContent = '✅ Copied ' + matches.length + ' links!';
+                    }).catch(() => {
+                        // Fallback
+                        const textarea = document.createElement('textarea');
+                        textarea.value = matches.join('\n');
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        textarea.remove();
+                        msg.textContent = '✅ Copied ' + matches.length + ' links!';
+                    });
+                };
+                btnBar.appendChild(copyBtn);
+
+                const copyAllBtn = document.createElement('button');
+                copyAllBtn.className = 'btn-copy';
+                copyAllBtn.textContent = '📋 Copy ALL links';
+                copyAllBtn.style.background = '#2a5a3a';
+                copyAllBtn.onclick = function() {
+                    navigator.clipboard.writeText(allLinks.join('\n')).then(() => {
+                        msg.textContent = '✅ Copied ALL ' + allLinks.length + ' links!';
+                    }).catch(() => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = allLinks.join('\n');
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        textarea.remove();
+                        msg.textContent = '✅ Copied ALL ' + allLinks.length + ' links!';
+                    });
+                };
+                btnBar.appendChild(copyAllBtn);
+
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'btn-close';
+                closeBtn.textContent = '✕ Close';
+                closeBtn.onclick = function() {
+                    modal.remove();
+                };
+                btnBar.appendChild(closeBtn);
+
+                modal.appendChild(btnBar);
+
+                const msg = document.createElement('div');
+                msg.style.cssText = 'margin:5px 0;color:#80d080;font-weight:bold;';
+                modal.appendChild(msg);
+
+                const stats = document.createElement('div');
+                stats.className = 'stats';
+                stats.textContent = 'Found ' + matches.length + ' links with id= | Total links: ' + allLinks.length;
+                modal.appendChild(stats);
+
+                const title = document.createElement('h3');
+                title.textContent = '🔗 Links with id=';
+                modal.appendChild(title);
+
+                const list = document.createElement('pre');
+                list.textContent = matches.length > 0 ? matches.join('\n') : 'No links found with id=';
+                modal.appendChild(list);
+
+                // If no matches, show all links
+                if (matches.length === 0 && allLinks.length > 0) {
+                    const allTitle = document.createElement('h3');
+                    allTitle.textContent = '📋 ALL links found:';
+                    allTitle.style.cssText = 'margin:8px 0;color:#b0d8f0;';
+                    modal.appendChild(allTitle);
+                    
+                    const allList = document.createElement('pre');
+                    allList.textContent = allLinks.join('\n');
+                    allList.style.cssText = 'background:#0b1a2a;padding:12px;border-radius:8px;max-height:200px;overflow:auto;color:#90b0c0;font-size:11px;white-space:pre-wrap;word-break:break-all;margin-top:10px;border-top:1px solid #2a4a5a;';
+                    modal.appendChild(allList);
+                }
+
+                document.body.appendChild(modal);
+            }
+
+            // Load and extract via proxy
+            function loadAndExtract(url) {
+                const PROXIES = [
+                    'https://corsproxy.org/?',
+                    'https://api.allorigins.win/raw?url=',
+                    'https://corsproxy.io/?'
+                ];
+                
+                let proxyIndex = 0;
+                const jsCode = injectInput.value.trim();
+                
+                if (!jsCode) {
+                    statusText.textContent = '⚠️ enter extraction code';
+                    return;
+                }
+                
+                statusText.textContent = '📄 fetching page...';
+                frameInfo.textContent = '⏳ fetching';
+                frameInfo.className = 'badge badge-warning';
+                proxyStatus.textContent = '🌍 trying proxies...';
+                proxyStatus.style.color = '#f0d080';
+                
+                fallbackMsg.style.display = 'flex';
+                fallbackMsg.innerHTML = `
+                    <div class="icon">🌍</div>
+                    <div>Fetching page via proxy...</div>
+                    <small>${url}</small>
+                `;
+
+                function tryProxy() {
+                    if (proxyIndex >= PROXIES.length) {
+                        fallbackMsg.style.display = 'flex';
+                        fallbackMsg.innerHTML = `
+                            <div class="icon">🔒</div>
+                            <div>All proxies failed</div>
+                            <small>Could not fetch the page. Try using a VPN or visit the page directly.</small>
+                            <small style="margin-top:8px;color:#6a8fa5;">The page is heavily blocked by proxy services.</small>
+                        `;
+                        statusText.textContent = '❌ all proxies failed';
+                        frameInfo.textContent = '⛔ blocked';
+                        frameInfo.className = 'badge badge-error';
+                        proxyStatus.textContent = '❌ all failed';
+                        proxyStatus.style.color = '#ff6a6a';
+                        return;
+                    }
+                    
+                    const proxy = PROXIES[proxyIndex];
+                    const proxyName = proxy.replace('https://', '').replace('/?', '').replace('/raw?url=', '');
+                    proxyStatus.textContent = '🌍 trying: ' + proxyName;
+                    
+                    statusText.textContent = '📄 trying ' + proxyName + '...';
+                    
+                    const proxyUrl = proxy + encodeURIComponent(url);
+                    
+                    fetch(proxyUrl, {
+                        signal: AbortSignal.timeout(20000)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        if (!html || html.length < 50) {
+                            throw new Error('Empty response');
+                        }
+                        
+                        const lower = html.toLowerCase();
+                        if (lower.includes('blocked') || lower.includes('forbidden') || 
+                            lower.includes('access denied') || lower.includes('not allowed') ||
+                            lower.includes('error')) {
+                            throw new Error('Proxy blocked');
+                        }
+                        
+                        // Store the HTML
+                        fetchedHtml = html;
+                        
+                        // Extract links using the JS code
+                        const result = extractLinksFromHtml(html, jsCode);
+                        
+                        if (result && result.matches !== undefined) {
+                            // Show results
+                            showResults(result.matches, result.allLinks);
+                            
+                            // Also display the page in the iframe
+                            const blob = new Blob([html], { type: 'text/html' });
+                            const blobUrl = URL.createObjectURL(blob);
+                            webFrame.src = blobUrl;
+                            
+                            fallbackMsg.style.display = 'none';
+                            statusText.textContent = '✅ extracted ' + result.matches.length + ' links';
+                            frameInfo.textContent = '📄 extracted';
+                            frameInfo.className = 'badge badge-success';
+                            proxyStatus.textContent = '✅ ' + proxyName;
+                            proxyStatus.style.color = '#80d080';
+                            
+                            setTimeout(() => {
+                                URL.revokeObjectURL(blobUrl);
+                            }, 5000);
+                        } else {
+                            throw new Error('Extraction failed - check your JS code');
+                        }
+                    })
+                    .catch(err => {
+                        console.log('Proxy ' + proxyName + ' failed:', err.message);
+                        proxyIndex++;
+                        tryProxy();
+                    });
+                }
+                
+                tryProxy();
+            }
+
+            function loadWebpage(rawUrl) {
+                const result = prepareUrl(rawUrl);
+                if (!result) {
+                    statusText.textContent = '⚠️ invalid link';
+                    urlDisplayText.textContent = '❌ invalid URL';
+                    webFrame.src = 'about:blank';
+                    fallbackMsg.style.display = 'flex';
+                    fallbackMsg.innerHTML = `
+                        <div class="icon">🚫</div>
+                        <div>Invalid link or unsupported protocol</div>
+                        <small>use http:// or https://</small>
+                    `;
+                    frameInfo.textContent = '⬡ error';
+                    frameInfo.className = 'badge badge-error';
+                    currentUrl = '';
+                    return;
+                }
+
+                const { url: clean, isViewSource } = result;
+
+                if (isViewSource) {
+                    // For view-source, just load and extract normally
+                    loadAndExtract(clean);
+                    return;
+                }
+
+                if (clean.toLowerCase().startsWith('javascript:')) {
+                    // Don't handle javascript: in this mode
+                    statusText.textContent = '⚠️ javascript: not supported';
+                    return;
+                }
+
+                currentUrl = clean;
+                urlInput.value = clean;
+                urlDisplayText.textContent = getDisplayText(clean, false);
+
+                // Load and extract
+                loadAndExtract(clean);
+            }
+
+            function handleLoad() {
+                const raw = urlInput.value.trim();
+                if (!raw) {
+                    statusText.textContent = '⚠️ enter a link';
+                    return;
+                }
+                loadWebpage(raw);
+            }
+
+            loadBtn.addEventListener('click', handleLoad);
+            urlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleLoad();
+                }
+            });
+
+            // ─── CLICK TO EDIT URL ────────────────────────────────────
+            function enterEditMode() {
+                if (isEditing) return;
+                isEditing = true;
+                viewUrlContainer.classList.add('editing');
+
+                let editValue = urlInput.value || currentUrl || '';
+                if (!editValue) {
+                    editValue = webFrame.src || '';
+                }
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = editValue;
+                input.placeholder = 'https://example.com or view-source:https://example.com';
+                input.autofocus = true;
+
+                urlDisplayText.textContent = '';
+                urlDisplayText.appendChild(input);
+                input.select();
+
+                function finishEdit(apply) {
+                    if (!isEditing) return;
+                    isEditing = false;
+                    viewUrlContainer.classList.remove('editing');
+
+                    const newVal = input.value.trim();
+                    input.remove();
+                    
+                    if (apply && newVal) {
+                        loadWebpage(newVal);
+                    } else {
+                        const isVS = urlInput.value && urlInput.value.toLowerCase().startsWith('view-source:');
+                        urlDisplayText.textContent = getDisplayText(currentUrl || '', isVS);
+                    }
+                }
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        finishEdit(true);
+                    }
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        finishEdit(false);
+                    }
+                });
+
+                input.addEventListener('blur', function(e) {
+                    setTimeout(() => {
+                        if (isEditing) {
+                            finishEdit(true);
+                        }
+                    }, 50);
+                });
+            }
+
+            viewUrlContainer.addEventListener('click', function(e) {
+                if (isEditing) return;
+                if (e.target.tagName === 'INPUT') return;
+                enterEditMode();
+            });
+
+            // ─── EXTRACT BUTTON ──────────────────────────────────────────
+            injectBtn.addEventListener('click', function() {
+                if (!fetchedHtml) {
+                    statusText.textContent = '⚠️ load a page first';
+                    return;
+                }
+                
+                const jsCode = injectInput.value.trim();
+                if (!jsCode) {
+                    statusText.textContent = '⚠️ enter extraction code';
+                    return;
+                }
+                
+                const result = extractLinksFromHtml(fetchedHtml, jsCode);
+                if (result && result.matches !== undefined) {
+                    showResults(result.matches, result.allLinks);
+                    statusText.textContent = '✅ extracted ' + result.matches.length + ' links';
+                } else {
+                    statusText.textContent = '❌ extraction failed';
+                }
+            });
+
+            injectClear.addEventListener('click', () => {
+                injectInput.value = '';
+                injectInput.focus();
+                statusText.textContent = 'cleared';
+            });
+
+            // ─── startup ──────────────────────────────────────────────
+            window.addEventListener('load', function() {
+                const defaultUrl = 'https://thepiratebay.org/search.php?q=gt+a+%2B+pc&cat=0';
+                if (urlInput.value === defaultUrl || urlInput.value === '') {
+                    loadWebpage(defaultUrl);
+                } else {
+                    const val = urlInput.value.trim();
+                    if (val) loadWebpage(val);
+                }
+            });
+
+            fallbackMsg.addEventListener('click', function() {
+                urlInput.focus();
+            });
+
+            console.log('🖥️ web-inside · TPB Link Extractor');
+        })();
+    </script>
+
+</body>
+</html>
